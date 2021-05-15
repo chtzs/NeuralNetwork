@@ -1,5 +1,7 @@
 from typing import List, Tuple
 
+import scipy.ndimage.interpolation
+
 from neural_network import NeuralNetwork
 import numpy as np
 import matplotlib.pyplot as plot
@@ -83,13 +85,34 @@ def test_img(n: NeuralNetwork, img_path: str) -> None:
 def train_nn(n: NeuralNetwork):
     t = time.perf_counter()
     print("start reading...")
-    trains_data, targets_list = load_trains_data("./trains_data/mnist_train.csv", 60000)
+    trains_data, targets_list = load_trains_data("./trains_data/mnist_train.csv", 5000)
     print("start learning...")
     epochs = 4
     for e in range(epochs):
         print("start generation ", e)
         for i in range(0, len(trains_data)):
             n.train(fix_data(trains_data[i]), targets_list[i][1])
+
+    print(f'training coast: {time.perf_counter() - t:.8f}s')
+
+
+def supper_train(n: NeuralNetwork):
+    t = time.perf_counter()
+    print("start reading...")
+    trains_data, targets_list = load_trains_data("./trains_data/mnist_train.csv", 5000)
+    print("start learning...")
+    epochs = 4
+    for e in range(epochs):
+        print("start generation ", e)
+        for i in range(0, len(trains_data)):
+            fixed = fix_data(trains_data[i])
+            plus10_img = scipy.ndimage.interpolation.rotate(np.array(fixed).reshape(28, 28), 10,
+                                                            cval=0.01, reshape=False)
+            minus10_img = scipy.ndimage.interpolation.rotate(np.array(fixed).reshape(28, 28), -10,
+                                                             cval=0.01, reshape=False)
+            n.train(fixed, targets_list[i][1])
+            n.train(plus10_img, targets_list[i][1])
+            n.train(minus10_img, targets_list[i][1])
 
     print(f'training coast: {time.perf_counter() - t:.8f}s')
 
@@ -118,7 +141,8 @@ if __name__ == '__main__':
         n.save_to_file(path)
 
     print("start testing...")
-    # test(n)
-    test_img(n, "./trains_data/8.png")
+    test(n)
+    scipy.ndimage.interpolation.rotate()
+    # test_img(n, "./trains_data/8.png")
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
