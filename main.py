@@ -111,8 +111,8 @@ def supper_train(n: NeuralNetwork):
             minus10_img = scipy.ndimage.interpolation.rotate(np.array(fixed).reshape(28, 28), -10,
                                                              cval=0.01, reshape=False)
             n.train(fixed, targets_list[i][1])
-            n.train(plus10_img, targets_list[i][1])
-            n.train(minus10_img, targets_list[i][1])
+            n.train(plus10_img.reshape(784), targets_list[i][1])
+            n.train(minus10_img.reshape(784), targets_list[i][1])
 
     print(f'training coast: {time.perf_counter() - t:.8f}s')
 
